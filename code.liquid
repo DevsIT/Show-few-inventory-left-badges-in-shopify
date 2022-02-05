@@ -1,0 +1,157 @@
+{
+  "name": "Products",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Badge"
+    },
+    {
+      "type": "range",
+      "id": "dsk_size",
+      "label": "Desktop Badge Size",
+      "default": 100,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "mob_size",
+      "label": "Mobile Badge Size",
+      "default": 100,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "image_picker",
+      "id": "new_badge",
+      "label": "New Badge"
+    },
+    {
+      "type": "range",
+      "id": "new_badge_days",
+      "label": "New Badge Days",
+      "default": 100,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "day"
+    },
+    {
+      "type": "image_picker",
+      "id": "sold_badge",
+      "label": "Sold Badge"
+    },
+    {
+      "type": "image_picker",
+      "id": "sale_badge",
+      "label": "Sale Badge"
+    },
+    {
+      "type": "image_picker",
+      "id": "few_left_badge",
+      "label": "Few Left Badge"
+    },
+    {
+      "type": "range",
+      "id": "inventory_number",
+      "label": "Inventory Number",
+      "default": 10,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "num",
+      "info": "Set inventory number limit for few left badge"
+    },
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "left_star",
+      "label": "Left Start"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_star",
+      "label": "Right Start"
+    },
+    {
+      "type": "header",
+      "content": "Menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "menu_star",
+      "label": "Menu Start"
+    }
+  ]
+},
+
+
+
+
+
+
+
+
+{% assign new_badge = false %}
+{% assign days = settings.new_badge_days %}
+{% assign period_time = days | times: 24 | times: 60 | times: 60 %}
+{% assign date_now = 'now' | date:'%s' %}
+{% assign date_finished = product.published_at | date:'%s' | plus: period_time | date:'%s' %}
+
+{% if date_finished > date_now %}
+{% assign new_badge = true %}
+{% endif %}
+
+
+{% assign total=0 %}
+{%for variant in product_card_product.variants %}
+{% assign total = total | plus: variant.inventory_quantity %}
+{%endfor%}
+
+{% assign intotal = total %}
+
+
+{% assign left_badge = false %}
+{% assign inventory_num = settings.inventory_number %}
+{% if intotal <= inventory_num %}
+{% assign left_badge = true %}
+{% endif %}
+
+
+
+
+
+
+
+
+
+      <div class="card__badge">
+        {%- if left_badge == true-%}
+         <span class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}" aria-hidden="true">
+          <img src="{{ settings.few_left_badge | img_url: "100x" }}">
+        </span>
+        {%- else -%}
+        {%- if new_badge == true-%}
+        <span class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}" aria-hidden="true">
+          <img src="{{ settings.new_badge | img_url: "100x" }}">
+        </span>
+
+        {%- elsif product_card_product.available == false -%}
+        <span class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}" aria-hidden="true">
+          <img src="{{ settings.sold_badge | img_url: "100x" }}">
+        </span>
+        {%- elsif product_card_product.compare_at_price > product_card_product.price and product_card_product.available -%}
+        <span class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}" aria-hidden="true">
+          <img src="{{ settings.sale_badge | img_url: "100x" }}">
+        </span>
+        {%- endif -%}
+
+        {%- endif -%}
+      </div>
